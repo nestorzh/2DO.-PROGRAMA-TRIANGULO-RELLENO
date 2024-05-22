@@ -1,1 +1,69 @@
-CODIGO FUENTE DE LA INTERFAZ
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+class Ui_dialog(object):
+    def setupUi(self, dialog):
+        dialog.setObjectName("dialog")
+        dialog.resize(800, 600)
+        
+        # Main layout
+        self.mainLayout = QtWidgets.QVBoxLayout(dialog)
+        
+        # Input layout
+        self.inputLayout = QtWidgets.QGridLayout()
+        self.mainLayout.addLayout(self.inputLayout)
+
+        # Labels and input fields
+        self.labels = ["Ax", "Ay", "Bx", "By", "Cx", "Cy"]
+        self.inputs = {}
+
+        for i, label_text in enumerate(self.labels):
+            label = QtWidgets.QLabel(dialog)
+            label.setText(f"{label_text}:")
+            self.inputLayout.addWidget(label, i, 0)
+            
+            input_field = QtWidgets.QLineEdit(dialog)
+            self.inputLayout.addWidget(input_field, i, 1)
+            self.inputs[label_text] = input_field
+        
+        # Buttons layout
+        self.buttonLayout = QtWidgets.QHBoxLayout()
+        self.mainLayout.addLayout(self.buttonLayout)
+
+        self.limpiar = QtWidgets.QPushButton(dialog)
+        self.limpiar.setObjectName("limpiar")
+        self.buttonLayout.addWidget(self.limpiar)
+        
+        self.calcular = QtWidgets.QPushButton(dialog)
+        self.calcular.setObjectName("calcular")
+        self.buttonLayout.addWidget(self.calcular)
+
+        # Graphics view
+        self.grafica = QtWidgets.QGraphicsView(dialog)
+        self.mainLayout.addWidget(self.grafica)
+        
+        self.retranslateUi(dialog)
+        QtCore.QMetaObject.connectSlotsByName(dialog)
+        
+        # Styling
+        dialog.setStyleSheet("""
+            QLabel {
+                font-size: 14px;
+            }
+            QLineEdit {
+                padding: 5px;
+                font-size: 14px;
+            }
+            QPushButton {
+                font-size: 14px;
+                padding: 5px 10px;
+            }
+            QGraphicsView {
+                border: 1px solid #ccc;
+            }
+        """)
+
+    def retranslateUi(self, dialog):
+        _translate = QtCore.QCoreApplication.translate
+        dialog.setWindowTitle(_translate("dialog", "Calculadora de pendientes"))
+        self.limpiar.setText(_translate("dialog", "Limpiar"))
+        self.calcular.setText(_translate("dialog", "Calcular"))
