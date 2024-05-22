@@ -1,113 +1,75 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+import sys
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from interface import Ui_dialog
 
-class Ui_dialog(object):
-    def setupUi(self, dialog):
-        dialog.setObjectName("dialog")
-        dialog.resize(800, 600)
+class LineCalculator(QDialog, Ui_dialog):
+    def _init_(self):
+        super()._init_()
+        self.setupUi(self)
+        self.setWindowTitle("Calculadora de pendientes")
+        self.limpiar.clicked.connect(self.limpiar_todo)
+        self.calcular.clicked.connect(self.calcular_linea)
         
-        # Establecer un estilo general para la ventana
-        dialog.setStyleSheet("""
-            QPushButton {
-                font-size: 14px;
-                padding: 5px 10px;
-                background-color: #5DADE2;
-                color: white;
-                border-radius: 5px;
-            }
-            QPushButton:hover {
-                background-color: #3498DB;
-            }
-            QLabel {
-                font-size: 14px;
-                font-weight: bold;
-            }
-            QLineEdit {
-                padding: 5px;
-                font-size: 14px;
-                border: 1px solid #ccc;
-                border-radius: 5px;
-            }
-            QGraphicsView {
-                border: 1px solid #ccc;
-                background-color: white;
-            }
-        """)
+        # Crear un layout vertical para la ventana
+        layout = QVBoxLayout()
+        self.grafica.setLayout(layout)
         
-        # Botón limpiar
-        self.limpiar = QtWidgets.QPushButton(dialog)
-        self.limpiar.setGeometry(QtCore.QRect(600, 500, 100, 30))
-        self.limpiar.setObjectName("limpiar")
+        # Crear una figura de Matplotlib y un lienzo
+        self.figure = Figure()
+        self.canvas = FigureCanvas(self.figure)
+        layout.addWidget(self.canvas)
         
-        # Botón calcular
-        self.calcular = QtWidgets.QPushButton(dialog)
-        self.calcular.setGeometry(QtCore.QRect(700, 500, 100, 30))
-        self.calcular.setObjectName("calcular")
+        # Agregar subgráfico
+        self.ax = self.figure.add_subplot(111)
         
-        # Etiquetas para los campos de entrada
-        self.label_ax = QtWidgets.QLabel(dialog)
-        self.label_ax.setGeometry(QtCore.QRect(10, 50, 30, 30))
-        self.label_ax.setObjectName("label_ax")
-        self.label_ax.setText("Ax:")
+        # Dibuja los ejes
+        self.ejes()
         
-        self.label_ay = QtWidgets.QLabel(dialog)
-        self.label_ay.setGeometry(QtCore.QRect(10, 90, 30, 30))
-        self.label_ay.setObjectName("label_ay")
-        self.label_ay.setText("Ay:")
+    def ejes(self):
+        # Limpia los ejes anteriores si los hay
+        self.ax.clear()
         
-        self.label_bx = QtWidgets.QLabel(dialog)
-        self.label_bx.setGeometry(QtCore.QRect(10, 130, 30, 30))
-        self.label_bx.setObjectName("label_bx")
-        self.label_bx.setText("Bx:")
+        # Dibuja los ejes X e Y
+        self.ax.axhline(0, color='black')
+        self.ax.axvline(0, color='black')
         
-        self.label_by = QtWidgets.QLabel(dialog)
-        self.label_by.setGeometry(QtCore.QRect(10, 170, 30, 30))
-        self.label_by.setObjectName("label_by")
-        self.label_by.setText("By:")
-        
-        self.label_cx = QtWidgets.QLabel(dialog)
-        self.label_cx.setGeometry(QtCore.QRect(10, 210, 30, 30))
-        self.label_cx.setObjectName("label_cx")
-        self.label_cx.setText("Cx:")
-        
-        self.label_cy = QtWidgets.QLabel(dialog)
-        self.label_cy.setGeometry(QtCore.QRect(10, 250, 30, 30))
-        self.label_cy.setObjectName("label_cy")
-        self.label_cy.setText("Cy:")
-        
-        # Campos de entrada
-        self.input_ax = QtWidgets.QLineEdit(dialog)
-        self.input_ax.setGeometry(QtCore.QRect(50, 50, 100, 30))
-        self.input_ax.setObjectName("input_ax")
-        
-        self.input_ay = QtWidgets.QLineEdit(dialog)
-        self.input_ay.setGeometry(QtCore.QRect(50, 90, 100, 30))
-        self.input_ay.setObjectName("input_ay")
-        
-        self.input_bx = QtWidgets.QLineEdit(dialog)
-        self.input_bx.setGeometry(QtCore.QRect(50, 130, 100, 30))
-        self.input_bx.setObjectName("input_bx")
-        
-        self.input_by = QtWidgets.QLineEdit(dialog)
-        self.input_by.setGeometry(QtCore.QRect(50, 170, 100, 30))
-        self.input_by.setObjectName("input_by")
-        
-        self.input_cx = QtWidgets.QLineEdit(dialog)
-        self.input_cx.setGeometry(QtCore.QRect(50, 210, 100, 30))
-        self.input_cx.setObjectName("input_cx")
-        
-        self.input_cy = QtWidgets.QLineEdit(dialog)
-        self.input_cy.setGeometry(QtCore.QRect(50, 250, 100, 30))
-        self.input_cy.setObjectName("input_cy")
-        
-        self.grafica = QtWidgets.QGraphicsView(dialog)
-        self.grafica.setGeometry(QtCore.QRect(200, 50, 500, 400))
-        self.grafica.setObjectName("grafica")
-        
-        self.retranslateUi(dialog)
-        QtCore.QMetaObject.connectSlotsByName(dialog)
+        # Refresca el lienzo
+        self.canvas.draw()
 
-    def retranslateUi(self, dialog):
-        _translate = QtCore.QCoreApplication.translate
-        dialog.setWindowTitle(_translate("dialog", "Calculadora de pendientes"))
-        self.limpiar.setText(_translate("dialog", "Limpiar"))
-        self.calcular.setText(_translate("dialog", "Calcular"))
+    def calcular_linea(self):
+        try:
+            # Limpia antes de empezar
+            self.ax.clear()
+            
+            # Obtiene los valores de los campos
+            ax = float(self.input_ax.text())
+            ay = float(self.input_ay.text())
+            bx = float(self.input_bx.text())
+            by = float(self.input_by.text())
+            cx = float(self.input_cx.text())
+            cy = float(self.input_cy.text())
+            
+            # Dibuja el triángulo
+            self.ax.plot([ax, bx, cx, ax], [ay, by, cy, ay], color='blue')
+            
+            # Refresca el lienzo
+            self.canvas.draw()
+            
+        except ValueError:
+            print("Error: Entrada inválida")
+        except Exception as e:
+            print(f"Error: {str(e)}")
+
+    def limpiar_todo(self):
+        # Limpia la gráfica
+        self.ax.clear()
+        # Dibuja los ejes nuevamente
+        self.ejes()
+
+if _name_ == "_main_":
+    app = QApplication(sys.argv)
+    window = LineCalculator()
+    window.show()
+    sys.exit(app.exec_())
