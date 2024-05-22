@@ -1,1 +1,76 @@
+import sys
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from interface import Ui_dialog
+
+class LineCalculator(QDialog, Ui_dialog):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.setWindowTitle("Calculadora de pendientes")
+        self.limpiar.clicked.connect(self.limpiar_todo)
+        self.calcular.clicked.connect(self.calcular_linea)
+        
+        # Crear un layout vertical para la ventana
+        layout = QVBoxLayout()
+        self.grafica.setLayout(layout)
+        
+        # Crear una figura de Matplotlib y un lienzo
+        self.figure = Figure()
+        self.canvas = FigureCanvas(self.figure)
+        layout.addWidget(self.canvas)
+        
+        # Agregar subgráfico
+        self.ax = self.figure.add_subplot(111)
+        
+        # Dibuja los ejes
+        self.ejes()
+        
+    def ejes(self):
+        # Limpia los ejes anteriores si los hay
+        self.ax.clear()
+        
+        # Dibuja los ejes X e Y
+        self.ax.axhline(0, color='black')
+        self.ax.axvline(0, color='black')
+        
+        # Refresca el lienzo
+        self.canvas.draw()
+
+    def calcular_linea(self):
+        try:
+            # Limpia antes de empezar
+            self.ax.clear()
+            
+            # Obtiene los valores de los campos
+            ax = float(self.input_ax.text())
+            ay = float(self.input_ay.text())
+            bx = float(self.input_bx.text())
+            by = float(self.input_by.text())
+            cx = float(self.input_cx.text())
+            cy = float(self.input_cy.text())
+            
+            # Dibuja el triángulo
+            self.ax.plot([ax, bx, cx, ax], [ay, by, cy, ay], color='blue')
+            
+            # Refresca el lienzo
+            self.canvas.draw()
+            
+        except ValueError:
+            print("Error: Entrada inválida")
+        except Exception as e:
+            print(f"Error: {str(e)}")
+
+    def limpiar_todo(self):
+        # Limpia la gráfica
+        self.ax.clear()
+        # Dibuja los ejes nuevamente
+        self.ejes()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = LineCalculator()
+    window.show()
+    sys.exit(app.exec_())
 
